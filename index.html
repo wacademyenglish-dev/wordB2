@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WOLFAITH Engine - The Word & The Light (B1)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,400;0,600;0,800;1,400;1,600&family=Cinzel:wght@400;700&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #050505;
+            color: #f4f4f5; 
+            overflow: hidden; 
+            margin: 0; height: 100vh; width: 100vw;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Classic Fonts */
+        .font-serif-classic { font-family: 'Playfair Display', serif; }
+        .font-sans-ui { font-family: 'Inter', sans-serif; }
+        .font-cinzel { font-family: 'Cinzel', serif; }
+
+        /* Tokens */
+        .text-sacred-gold { color: #D4AF37; }
+        .bg-sacred-gold { background-color: #D4AF37; }
+
+        /* Bible Aesthetics (Used inside the app) */
+        .leather-overlay {
+            position: absolute; inset: 0;
+            background-image: url("https://www.transparenttextures.com/patterns/dark-leather.png");
+            opacity: 0.4; mix-blend-mode: color-dodge; pointer-events: none; z-index: 0;
+        }
+        .divine-glow {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 120vw; height: 120vw; border-radius: 50%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 60%);
+            pointer-events: none; z-index: 0; animation: pulseGlow 5s infinite alternate ease-in-out;
+        }
+        @keyframes pulseGlow { 0% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.95); } 100% { opacity: 1.2; transform: translate(-50%, -50%) scale(1.05); } }
+
+        .cross-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 90vh; color: #D4AF37; opacity: 0.02; pointer-events: none; z-index: 0; filter: drop-shadow(0 0 50px rgba(212,175,55,0.5)); }
+        
+        .gilded-edges { position: fixed; top: 0; bottom: 0; width: 12px; pointer-events: none; z-index: 10; background: repeating-linear-gradient(to bottom, #8B6508 0px, #D4AF37 2px, #B8860B 4px, #FFD700 5px); box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+        .gilded-edge-left { left: 0; border-right: 2px solid rgba(0,0,0,0.9); }
+        .gilded-edge-right { right: 0; border-left: 2px solid rgba(0,0,0,0.9); }
+        .bookmark-ribbon { position: fixed; top: -10px; right: 12%; width: 45px; height: 160px; z-index: 60; background: linear-gradient(to right, #3a0a11, #722F37, #9B2C2C, #722F37, #3a0a11); box-shadow: -5px 10px 20px rgba(0,0,0,0.8), inset 0 -10px 20px rgba(0,0,0,0.5); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 85%, 0 100%); pointer-events: none; transform: rotate(3deg); border-bottom: 2px solid rgba(212,175,55,0.5); }
+        .corner-ornament { position: fixed; width: 80px; height: 80px; pointer-events: none; z-index: 50; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none' stroke='%23D4AF37' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M0,20 Q20,20 20,0 M0,40 Q40,40 40,0 M20,20 Q40,40 60,20 Q40,0 20,20 M10,10 L30,30' opacity='0.6'/%3E%3C/svg%3E"); background-size: contain; background-repeat: no-repeat; }
+        .corner-tl { top: 15px; left: 25px; } .corner-tr { top: 15px; right: 25px; transform: scaleX(-1); } .corner-bl { bottom: 15px; left: 25px; transform: scaleY(-1); } .corner-br { bottom: 15px; right: 25px; transform: scale(-1, -1); }
+        .gold-foil-frame { position: fixed; inset: 15px 25px; pointer-events: none; z-index: 49; border: 1px solid rgba(212, 175, 55, 0.2); outline: 1px dashed rgba(212, 175, 55, 0.1); outline-offset: -5px; }
+
+        /* Cover Image BG */
+        .cover-image-bg { position: absolute; inset: 0; background-image: url('https://wallpapercave.com/wp/wp15410168.webp'); background-size: cover; background-position: center; z-index: 0; }
+        .cover-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #050505 0%, rgba(5,5,5,0.8) 40%, rgba(5,5,5,0.2) 100%); z-index: 1; }
+
+        /* UI Elements */
+        .safe-scroll-container { display: flex; flex-direction: column; height: 100%; overflow-y: auto; overflow-x: hidden; padding: 0 30px;}
+        .safe-scroll-container::-webkit-scrollbar { width: 5px; }
+        .safe-scroll-container::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.4); border-radius: 5px; }
+        .safe-scroll-content { margin: auto; width: 100%; padding: 4rem 1rem 8rem 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+        .bible-card { background: linear-gradient(180deg, rgba(15,15,15,0.95) 0%, rgba(5,5,5,0.98) 100%); backdrop-filter: blur(20px); border: 2px solid #2a2015; box-shadow: 0 0 0 1px rgba(212,175,55,0.1), 0 0 0 4px rgba(10,10,10,0.8), 0 0 0 5px rgba(212,175,55,0.3), 0 30px 60px rgba(0,0,0,0.9); border-radius: 6px; position: relative; width: 100%; max-width: 1000px; padding: 3rem; }
+        .bible-card::before { content: ''; position: absolute; inset: 8px; border: 1px dashed rgba(212,175,55,0.2); pointer-events: none; }
+        
+        .btn-gold { background: linear-gradient(135deg, #FFDF73 0%, #D4AF37 40%, #996515 80%, #5c3c08 100%); color: #050505; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; border: 1px solid #FFED99; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3), inset 0 2px 5px rgba(255,255,255,0.5); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 3px; padding: 16px 36px; cursor: pointer; text-shadow: 0 1px 1px rgba(255,255,255,0.3); }
+        .btn-gold:hover:not(:disabled) { filter: brightness(1.2); transform: translateY(-3px); box-shadow: 0 15px 35px rgba(212, 175, 55, 0.5); }
+
+        /* The Void Pre-loader */
+        .void-screen { position: absolute; inset: 0; background: #000; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 3s ease-out; }
+        .void-screen.light-explosion { background: #fff; opacity: 0; pointer-events: none; }
+        .void-text { color: #333; font-family: 'Playfair Display', serif; font-size: 2rem; font-style: italic; transition: color 2s; text-align: center; }
+        .void-screen.light-explosion .void-text { color: #fff; text-shadow: 0 0 50px #D4AF37; }
+
+        /* Greek Decoder */
+        .greek-word { font-family: 'Cinzel', serif; font-size: 4rem; color: #D4AF37; text-shadow: 0 0 30px rgba(212,175,55,0.8); letter-spacing: 0.1em; animation: pulseGlow 2s infinite alternate; }
+
+        /* Parallel Scrolls */
+        .scroll-column { background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.1); padding: 2rem; border-radius: 4px; }
+        
+        /* Creator's Forge */
+        .forge-word { background: linear-gradient(180deg, #e5e5e5 0%, #a3a3a3 100%); color: #000; padding: 10px 20px; font-weight: bold; font-family: 'Playfair Display', serif; font-size: 1.5rem; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid #fff; border-radius: 4px;}
+        .forge-word:hover { transform: translateY(-4px) scale(1.05); box-shadow: 0 12px 30px rgba(212,175,55,0.6); }
+        .forge-slot { min-width: 120px; height: 60px; border: 2px dashed rgba(212,175,55,0.4); display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); }
+
+        /* Relics */
+        .relic-table { border-bottom: 4px solid #1a110a; box-shadow: 0 20px 20px -20px rgba(212,175,55,0.2); display: flex; justify-content: center; gap: 3rem; padding-bottom: 2rem; align-items: flex-end; height: 150px; }
+        .relic-item { cursor: pointer; transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8)); opacity: 0.7; }
+        .relic-item:hover, .relic-item.active { transform: scale(1.25) translateY(-20px); filter: drop-shadow(0 0 40px rgba(212,175,55,0.9)); opacity: 1; }
+        .parchment-modal { background: #e8dcc4; background-image: url("https://www.transparenttextures.com/patterns/old-wall.png"); color: #3e2723; border-radius: 4px; padding: 2rem; box-shadow: 0 30px 60px rgba(0,0,0,0.9), inset 0 0 50px rgba(139,69,19,0.2); position: relative; overflow: hidden; border: 1px solid #c8b99c; animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        /* Premium Video Iframe */
+        .video-frame-glow { box-shadow: 0 0 50px rgba(212,175,55,0.15), inset 0 0 20px rgba(0,0,0,0.8); transition: box-shadow 0.5s ease; }
+        .video-frame-glow:hover { box-shadow: 0 0 70px rgba(212,175,55,0.3), inset 0 0 20px rgba(0,0,0,0.8); }
+
+        /* Teacher Tools */
+        .side-panel { position: fixed; top: 0; right: -100%; width: 100%; max-width: 500px; height: 100vh; background: rgba(5, 10, 15, 0.98); backdrop-filter: blur(20px); border-left: 2px solid #D4AF37; z-index: 100; transition: right 0.5s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; box-shadow: -20px 0 50px rgba(0,0,0,0.9); }
+        .side-panel.open { right: 0; }
+        .praise-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .praise-text { font-family: 'Playfair Display', serif; font-size: 5rem; color: #FFD700; text-shadow: 0 0 40px rgba(212,175,55,1), 0 0 80px rgba(212,175,55,0.6); animation: praiseFade 3s ease-out forwards; font-weight: 900; font-style: italic; }
+        @keyframes praiseFade { 0% { opacity: 0; transform: scale(0.5); } 20% { opacity: 1; transform: scale(1.1); } 80% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.5); } }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fadeIn { animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    </style>
+</head>
+<body class="selection:bg-[#D4AF37]/30 selection:text-white">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const YOUTUBE_ID = "Xz_QEYwerkw"; 
+        const t = (obj, lang) => {
+            if (!obj) return '';
+            if (typeof obj === 'string') return obj;
+            return obj[lang] || obj['en'] || '';
+        };
+
+        const Icon = ({ name, size = 24, className = "" }) => <i className={`fa-solid fa-${name} ${className}`} style={{ fontSize: size }}></i>;
+        
+        // Polished Confetti Component
+        const Confetti = () => {
+            useEffect(() => {
+                const colors = ['#D4AF37','#F3E5AB','#FFFFFF'];
+                for(let i=0;i<40;i++){
+                    const p = document.createElement('div');
+                    p.style.position = 'fixed'; p.style.zIndex = '9999'; p.style.pointerEvents = 'none';
+                    p.style.left = window.innerWidth/2 + (Math.random()-0.5)*200 + 'px';
+                    p.style.top = window.innerHeight/2 + (Math.random()-0.5)*150 + 'px';
+                    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+                    p.style.width = p.style.height = Math.random()*8+4+'px';
+                    p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                    p.style.boxShadow = '0 0 10px rgba(212,175,55,0.8)';
+                    p.style.transition = 'all 2.5s cubic-bezier(0.25, 1, 0.5, 1)';
+                    document.body.appendChild(p);
+                    setTimeout(() => { p.style.transform = `translate(${(Math.random()-0.5)*800}px, ${Math.random()*600+200}px) rotate(${Math.random()*720}deg)`; p.style.opacity = '0'; }, 50);
+                    setTimeout(() => p.remove(), 2600);
+                }
+            }, []);
+            return null;
+        };
+
+        // ==========================================
+        // 🛠️ TEACHER TOOLS
+        // ==========================================
+        const TeacherTools = ({ lang, toggleLang }) => {
+            const [open, setOpen] = useState(false);
+            const [praise, setPraise] = useState(false);
+
+            const triggerPraise = () => { setPraise(true); setTimeout(() => setPraise(false), 3000); };
+            const toggleFullScreen = () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                }
+            };
+
+            return (
+                <React.Fragment>
+                    <div className="fixed top-6 right-6 z-[100] flex gap-4">
+                        <button onClick={toggleFullScreen} className="bg-black/80 border border-[#D4AF37]/50 text-[#D4AF37] w-12 h-12 rounded hover:bg-[#D4AF37]/20 transition-all flex items-center justify-center backdrop-blur-md" title={lang === 'en' ? 'Fullscreen' : 'Tela Cheia'}>
+                            <Icon name="expand" size={18}/>
+                        </button>
+                        <button onClick={toggleLang} className="bg-black/80 border border-[#D4AF37]/50 text-[#D4AF37] px-4 h-12 rounded hover:bg-[#D4AF37]/20 transition-all font-bold text-xs uppercase tracking-widest backdrop-blur-md">
+                            <Icon name="globe" size={14} className="mr-2"/> {lang === 'en' ? 'PT' : 'EN'}
+                        </button>
+                        <button onClick={() => setOpen(!open)} className="bg-black/80 border border-[#D4AF37]/50 text-[#D4AF37] w-12 h-12 rounded hover:bg-[#D4AF37]/20 transition-all flex items-center justify-center backdrop-blur-md"><Icon name="feather" size={18} /></button>
+                        <button onClick={triggerPraise} className="bg-black/80 border border-emerald-500/50 text-emerald-400 w-12 h-12 rounded hover:bg-emerald-500/20 transition-all flex items-center justify-center backdrop-blur-md"><Icon name="star" size={18} /></button>
+                    </div>
+
+                    <div className={`side-panel p-8 ${open ? 'open' : ''}`}>
+                        <div className="flex justify-between items-center mb-8 border-b border-zinc-800 pb-4">
+                            <h2 className="text-[#D4AF37] font-serif-classic text-2xl italic flex items-center gap-3"><Icon name="feather" size={20}/> Theological Notes</h2>
+                            <button onClick={() => setOpen(false)} className="text-zinc-500 hover:text-white"><Icon name="xmark" size={28}/></button>
+                        </div>
+                        <textarea className="flex-1 w-full bg-black/50 border border-zinc-800 rounded p-6 text-zinc-300 font-sans-ui text-lg leading-relaxed resize-none outline-none focus:border-[#D4AF37]" placeholder={lang === 'en' ? "Write notes..." : "Escreva as notas da aula..."}></textarea>
+                    </div>
+
+                    {praise && (
+                        <div className="praise-overlay">
+                            <div className="praise-text flex flex-col items-center">
+                                <Icon name="crown" size={100} className="mb-6 text-[#D4AF37]" />
+                                <span>{lang === 'en' ? "EXCELLENT!" : "EXCELENTE!"}</span>
+                            </div>
+                        </div>
+                    )}
+                </React.Fragment>
+            );
+        };
+
+        // ==========================================
+        // 🧩 V5.0 B1 COMPONENTS
+        // ==========================================
+
+        const TheVoidSlide = ({ onComplete }) => {
+            const [exploding, setExploding] = useState(false);
+
+            const handleLight = () => {
+                setExploding(true);
+                setTimeout(onComplete, 2500); 
+            };
+
+            return (
+                <div className={`void-screen ${exploding ? 'light-explosion' : ''}`}>
+                    <p className="void-text mb-12">
+                        "The earth was void and without form,<br/>and darkness covered the face of the deep."
+                    </p>
+                    {!exploding && (
+                        <button onClick={handleLight} className="btn-gold flex flex-col items-center gap-2 px-12 py-6 animate-pulse">
+                            <Icon name="microphone" size={20} />
+                            <span>Say: "Let there be light"</span>
+                        </button>
+                    )}
+                </div>
+            );
+        };
+
+        const CoverSlide = ({ s, lang, next }) => (
+            <div className="text-center animate-fadeIn flex flex-col items-center w-full max-w-4xl z-10">
+                <Icon name="sun" size={60} className="text-[#D4AF37] mb-8 drop-shadow-[0_0_40px_rgba(212,175,55,1)]" />
+                <h1 className="text-5xl md:text-8xl font-serif-classic text-white mb-6 italic tracking-tight drop-shadow-[0_0_30px_rgba(0,0,0,1)]">{t(s.title, lang)}</h1>
+                <h2 className="text-xl md:text-2xl text-[#D4AF37] font-sans-ui font-black mb-8 tracking-[0.3em] uppercase drop-shadow-[0_0_15px_rgba(0,0,0,0.8)]">{t(s.subtitle, lang)}</h2>
+                
+                <div className="w-1/2 h-[1px] bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent my-6 opacity-60"></div>
+                
+                <div className="flex gap-4 text-xs font-bold text-zinc-300 uppercase tracking-widest mb-12 bg-black/40 px-6 py-3 border border-[#D4AF37]/20 rounded backdrop-blur-md">
+                    <span>{s.level}</span> <span className="text-[#D4AF37]">|</span> <span>{s.grammar}</span>
+                </div>
+                <button onClick={next} className="btn-gold text-lg px-12 py-4"><Icon name="play" className="mr-3" /> {lang === 'en' ? 'Start Journey' : 'Iniciar Jornada'}</button>
+            </div>
+        );
+
+        const GuideSlide = ({ s, lang }) => (
+            <div className="bible-card text-left animate-fadeIn z-10">
+                <div className="flex items-center gap-4 mb-8 border-b border-[#D4AF37]/30 pb-4">
+                    <Icon name="scroll" size={40} className="text-[#D4AF37]" />
+                    <h2 className="text-3xl font-serif-classic text-[#D4AF37]">{t(s.title, lang)}</h2>
+                </div>
+                <p className="text-zinc-300 font-sans-ui text-xl leading-relaxed font-light">{t(s.content, lang)}</p>
+            </div>
+        );
+
+        const HolyRelics = ({ lang }) => {
+            const [activeRelic, setActiveRelic] = useState(null);
+
+            const relics = [
+                { id: 'word', icon: 'scroll', color: '#D4AF37', title: { en: 'The Incarnation', pt: 'A Encarnação' }, meaning: { en: 'The Logos made flesh.', pt: 'O Logos feito carne.' }, secret: { en: "Logos refers to the divine reason that governs the cosmos. It implies absolute order and meaning.", pt: "Logos refere-se à razão divina que governa o cosmos. Implica ordem e sentido absolutos." }, discussion: { q: {en: "If the universe is governed by 'Logos' (reason), why does it often feel so chaotic?", pt: "Se o universo é governado pelo 'Logos' (razão), por que muitas vezes parece tão caótico?"}, h: {en:"One could argue that chaos is... / It fundamentally changes our perspective because...", pt:"Poder-se-ia argumentar que o caos é... / Muda fundamentalmente a nossa perspetiva porque..."} } },
+                { id: 'light', icon: 'sun', color: '#fff', title: { en: 'Illumination', pt: 'Iluminação' }, meaning: { en: 'Absolute truth.', pt: 'Verdade absoluta.' }, secret: { en: "Illumination doesn't just reveal what is hidden; it transforms the very nature of what it touches.", pt: "A iluminação não apenas revela o que está escondido; transforma a própria natureza daquilo em que toca." }, discussion: { q: {en: "Why is humanity often resistant to absolute truth (illumination)?", pt: "Por que a humanidade frequentemente resiste à verdade absoluta (iluminação)?"}, h: {en: "It stands to reason that people fear... / Truth exposes flaws, therefore...", pt: "Faz sentido que as pessoas temam... / A verdade expõe falhas, portanto..."} } },
+                { id: 'void', icon: 'moon', color: '#888', title: { en: 'Formlessness', pt: 'Ausência de Forma' }, meaning: { en: 'Tohu wa-bohu (Chaos).', pt: 'Tohu wa-bohu (Caos).' }, secret: { en: "The void wasn't just 'nothingness'; it was a state of unfulfilled potential waiting for the Creator's command.", pt: "O vazio não era apenas 'nada'; era um estado de potencial não realizado à espera do comando do Criador." }, discussion: { q: {en: "Can a state of 'formlessness' in our lives be necessary for profound growth?", pt: "Um estado de 'ausência de forma' nas nossas vidas pode ser necessário para um crescimento profundo?"}, h: {en:"I firmly believe that... / Without a period of chaos, it is impossible to...", pt: "Creio firmemente que... / Sem um período de caos, é impossível..."} } }
+            ];
+
+            const active = relics.find(r => r.id === activeRelic);
+
+            return (
+                <div className="w-full max-w-4xl text-center animate-fadeIn z-10 mx-auto pt-10 pb-12">
+                    <h2 className="text-2xl font-sans-ui font-black mb-4 text-[#D4AF37] uppercase tracking-[0.3em] drop-shadow-md">{lang === 'en' ? "The Holy Relics" : "As Relíquias Sagradas"}</h2>
+                    <p className="text-zinc-400 font-serif-classic italic mb-12">{lang === 'en' ? "Touch an artifact to uncover its meaning." : "Toque num artefacto para descobrir o seu significado."}</p>
+
+                    <div className="relic-table mb-8 relative">
+                        {relics.map(r => (
+                            <div key={r.id} onClick={() => setActiveRelic(r.id)} className={`relic-item ${activeRelic === r.id ? 'active' : ''}`} style={{ color: r.color }}>
+                                <Icon name={r.icon} size={60} />
+                            </div>
+                        ))}
+                    </div>
+
+                    {active && (
+                        <div className="flex flex-col gap-4 w-full">
+                            <div className="parchment-modal text-left flex flex-col md:flex-row gap-6 items-center w-full">
+                                <div className="flex-1">
+                                    <p className="font-sans-ui font-black text-xs uppercase tracking-widest text-[#8B6508] mb-2">{lang === 'en' ? 'B1 Dictionary' : 'Dicionário B1'}</p>
+                                    <h3 className="font-serif-classic text-4xl font-bold mb-2 text-[#3e2723]">{t(active.title, lang)}</h3>
+                                    <p className="font-sans-ui text-xl font-bold text-[#5c3c08] mt-4">"{t(active.meaning, lang)}"</p>
+                                </div>
+                                <div className="flex-1 bg-[#fff8e7] p-6 rounded border border-[#d8cbb0] shadow-inner">
+                                    <p className="font-sans-ui font-black text-[10px] uppercase tracking-widest text-zinc-500 mb-2 flex items-center gap-2">
+                                        <Icon name="feather" size={12}/> {lang === 'en' ? "The Scribe's Secret" : "O Segredo do Escriba"}
+                                    </p>
+                                    <p className="font-serif-classic italic text-lg leading-relaxed text-[#4a3622]">{t(active.secret, lang)}</p>
+                                </div>
+                            </div>
+                            <div className="bg-[#110a0a]/90 border border-[#D4AF37]/30 p-6 rounded text-left animate-fadeIn shadow-[inset_0_0_20px_rgba(212,175,55,0.05)] w-full flex flex-col md:flex-row gap-6 items-center backdrop-blur-md">
+                                <div className="flex-[1.5]">
+                                    <p className="text-[#D4AF37] font-bold uppercase tracking-widest text-[10px] mb-3 flex items-center gap-2"><Icon name="comments" size={12}/> {lang === 'en' ? 'Relic Reflection' : 'Reflexão'}</p>
+                                    <p className="text-white font-serif-classic italic text-xl leading-relaxed">"{t(active.discussion.q, lang)}"</p>
+                                </div>
+                                <div className="flex-1 border-l-2 border-[#D4AF37]/20 pl-6 h-full flex flex-col justify-center">
+                                    <p className="text-[#D4AF37] font-bold uppercase tracking-widest text-[10px] mb-3 flex items-center gap-2"><Icon name="lightbulb" size={12}/> {lang === 'en' ? 'Speaking Starters (B1)' : 'Para Iniciar a Conversa (B1)'}</p>
+                                    <p className="text-zinc-300 font-sans-ui font-light text-sm">"{t(active.discussion.h, lang).split(' / ')[0]}"</p>
+                                    <p className="text-zinc-300 font-sans-ui font-light text-sm mt-2">"{t(active.discussion.h, lang).split(' / ')[1]}"</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const ParallelScrolls = ({ lang }) => {
+            const [revealed, setRevealed] = useState(false);
+
+            return (
+                <div className="w-full max-w-5xl mx-auto flex flex-col items-center z-10 animate-fadeIn text-center pb-12">
+                    <h2 className="text-2xl font-sans-ui font-black mb-4 text-[#D4AF37] uppercase tracking-[0.3em] drop-shadow-md">The Parallel Scrolls</h2>
+                    <p className="text-zinc-400 font-serif-classic italic mb-10 text-xl">{lang === 'en' ? "Connecting the Old and New Testament." : "Conectando o Velho e o Novo Testamento."}</p>
+                    
+                    <div className="grid md:grid-cols-2 gap-8 w-full mb-10">
+                        <div className="scroll-column relative overflow-hidden bible-card !p-8 !bg-transparent border border-[#D4AF37]/30">
+                            <div className="absolute top-0 right-0 p-4 opacity-10"><Icon name="scroll" size={100} /></div>
+                            <h3 className="text-xl text-[#D4AF37] font-cinzel font-bold mb-6 border-b border-zinc-800 pb-2">Genesis 1</h3>
+                            <p className="font-serif-classic italic text-2xl text-white leading-relaxed mb-4">"In the beginning <span className="text-[#D4AF37] font-bold">God created</span> the heavens and the earth."</p>
+                            <p className="font-serif-classic italic text-xl text-zinc-400">"Then God said, '<span className="text-[#D4AF37] font-bold">Let there be light</span>'."</p>
+                        </div>
+                        <div className="scroll-column relative overflow-hidden bible-card !p-8 !bg-transparent border border-[#D4AF37]/30">
+                            <div className="absolute top-0 right-0 p-4 opacity-10"><Icon name="scroll" size={100} /></div>
+                            <h3 className="text-xl text-[#D4AF37] font-cinzel font-bold mb-6 border-b border-zinc-800 pb-2">John 1</h3>
+                            <p className={`font-serif-classic italic text-2xl text-white leading-relaxed mb-4 transition-opacity duration-1000 ${revealed ? 'opacity-100' : 'opacity-0'}`}>"In the beginning <span className="text-[#D4AF37] font-bold">was the Word</span>... and the Word was God."</p>
+                            <p className={`font-serif-classic italic text-xl text-zinc-400 transition-opacity duration-1000 delay-500 ${revealed ? 'opacity-100' : 'opacity-0'}`}>"In Him was life, and the life was the <span className="text-[#D4AF37] font-bold">light</span> of men."</p>
+                        </div>
+                    </div>
+                    
+                    {!revealed ? (
+                        <button onClick={() => setRevealed(true)} className="btn-gold px-10 py-4 text-sm"><Icon name="link" className="mr-2" /> {lang === 'en' ? "Reveal the Connection" : "Revelar Conexão"}</button>
+                    ) : (
+                        <div className="bg-[#110a0a]/90 border border-[#D4AF37]/30 p-8 rounded text-left animate-fadeIn shadow-inner max-w-4xl w-full flex flex-col md:flex-row gap-8 items-center backdrop-blur-md">
+                            <div className="flex-[1.5]">
+                                <p className="text-[#D4AF37] font-bold uppercase tracking-widest text-[10px] mb-3 flex items-center gap-2"><Icon name="comments" size={12}/> {lang === 'en' ? 'Follow Up' : 'Para Refletir'}</p>
+                                <p className="text-white font-serif-classic italic text-2xl leading-relaxed">"{lang === 'en' ? 'Why do you think the New Testament starts by repeating the exact words of Genesis?' : 'Por que achas que o Novo Testamento começa repetindo as palavras exatas de Génesis?'}"</p>
+                            </div>
+                            <div className="flex-1 border-l-2 border-[#D4AF37]/20 pl-6 h-full flex flex-col justify-center">
+                                <p className="text-[#D4AF37] font-bold uppercase tracking-widest text-[10px] mb-3 flex items-center gap-2"><Icon name="lightbulb" size={12}/> {lang === 'en' ? 'Speaking Starters (B1)' : 'Para Iniciar a Conversa (B1)'}</p>
+                                <p className="text-zinc-300 font-sans-ui font-light text-sm">"{lang === 'en' ? 'It shows that Jesus is...' : 'Mostra que Jesus é...'}"</p>
+                                <p className="text-zinc-300 font-sans-ui font-light text-sm mt-2">"{lang === 'en' ? 'It proves that the story is...' : 'Prova que a história é...'}"</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const GreekDecoder = ({ lang }) => {
+            const [decoded, setDecoded] = useState(false);
+            
+            return (
+                <div className="bible-card text-center animate-fadeIn z-10">
+                    <p className="text-[#D4AF37] font-sans-ui font-bold tracking-[0.3em] text-[10px] uppercase mb-4">The Greek Decoder</p>
+                    <h2 className="text-4xl md:text-5xl font-serif-classic italic text-white mb-10 leading-relaxed">"In the beginning was the <span onClick={() => setDecoded(true)} className={`cursor-pointer transition-all duration-500 border-b-2 ${decoded ? 'text-[#D4AF37] border-transparent font-bold' : 'text-zinc-400 border-dashed border-[#D4AF37] hover:text-[#D4AF37] hover:border-solid'}`}>Word</span>..."</h2>
+                    
+                    {decoded && (
+                        <div className="animate-fadeIn bg-[#050a14] border border-[#1a2a3a] p-10 rounded shadow-[inset_0_0_30px_rgba(212,175,55,0.05)]">
+                            <p className="greek-word mb-6">ΛΟΓΟΣ</p>
+                            <p className="font-sans-ui text-xl font-bold tracking-[0.3em] text-[#D4AF37] uppercase mb-4">(Logos)</p>
+                            <p className="font-serif-classic text-2xl text-zinc-300 leading-relaxed italic border-t border-[#1a2a3a] pt-6 mt-6">
+                                {lang === 'en' ? "The Greeks used 'Logos' to describe Divine Reason. It is what gives the world form and meaning. Jesus is the Logos." : "Os gregos usavam 'Logos' para descrever a Razão Divina. É o que dá forma e sentido ao mundo. Jesus é o Logos."}
+                            </p>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const VideoSlide = ({ s, lang }) => {
+            const videoSrc = `https://www.youtube.com/embed/${s.videoId}?start=${s.start}&end=${s.end}&rel=0&modestbranding=1&showinfo=0`;
+            return (
+                <div className="flex flex-col items-center justify-center h-full w-full max-w-5xl mx-auto p-6 animate-fadeIn text-center z-10">
+                    <h2 className="text-3xl font-serif-classic italic text-[#D4AF37] mb-2">{t(s.title, lang)}</h2>
+                    <p className="text-sm text-zinc-400 font-sans-ui font-bold tracking-widest uppercase mb-8">{t(s.mission, lang)}</p>
+                    <div className="w-full aspect-video bg-black border border-[#D4AF37]/30 video-frame-glow p-2 rounded relative">
+                        <div className="absolute inset-0 border border-[#D4AF37]/20 rounded pointer-events-none"></div>
+                        <iframe className="w-full h-full rounded-sm" src={videoSrc} frameBorder="0" allow="autoplay; encrypted-media" allowFullScreen></iframe>
+                    </div>
+                </div>
+            );
+        };
+
+        const DiscussionSlide = ({ s, lang }) => {
+            const questions = Array.isArray(s.questions) ? s.questions : [{ question: s.question, hint: s.hint }];
+            const mainQ = questions[0];
+            const followUps = questions.slice(1);
+            const [openId, setOpenId] = useState(null); // id of the open follow-up
+            
+            return (
+                <div className="flex flex-col items-center justify-center h-full w-full max-w-5xl mx-auto p-6 animate-fadeIn z-10 text-center pb-24">
+                    <Icon name={s.icon || "comments"} size={50} className="text-[#D4AF37] mb-6 opacity-80 drop-shadow-[0_0_15px_rgba(212,175,55,0.5)]" />
+                    <h2 className="text-2xl font-sans-ui font-black text-[#D4AF37] uppercase tracking-[0.2em] mb-10">
+                        {t(s.title, lang)} 
+                    </h2>
+
+                    <div className="w-full flex flex-col items-center gap-6">
+                        {/* MAIN QUESTION */}
+                        <div className="w-full max-w-4xl flex flex-col items-center">
+                            <p className="text-3xl md:text-5xl text-white font-serif-classic italic leading-relaxed mb-8">
+                                "{t(mainQ.question, lang)}"
+                            </p>
+                            <div className="bg-black/60 border border-[#722F37]/50 p-6 w-full max-w-2xl text-left backdrop-blur-md rounded shadow-inner">
+                                <p className="text-[#D4AF37] font-bold uppercase tracking-widest text-[10px] mb-3 flex items-center gap-2">
+                                    <Icon name="lightbulb" size={12}/> {lang === 'en' ? 'Speaking Starters (B1)' : 'Para Iniciar a Conversa (B1)'}
+                                </p>
+                                <div className="space-y-2">
+                                    {t(mainQ.hint, lang).split('/').map((h, i) => (
+                                        <p key={i} className="text-base text-zinc-300 font-sans-ui font-light border-l-2 border-zinc-700 pl-4 py-1">
+                                            "{h.trim()}"
+                                        </p>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* FOLLOW UPS */}
+                        {followUps.length > 0 && (
+                            <div className="w-full max-w-3xl mt-8 flex flex-col gap-4">
+                                {followUps.map((fq, idx) => (
+                                    <div key={idx} className="w-full bg-[#110a0a]/80 border border-[#D4AF37]/30 rounded shadow-inner overflow-hidden transition-all duration-300">
+                                        <button 
+                                            onClick={() => setOpenId(openId === idx ? null : idx)}
+                                            className="w-full p-4 flex justify-between items-center bg-black/40 hover:bg-[#D4AF37]/10 transition-colors"
+                                        >
+                                            <span className="text-[#D4AF37] font-bold uppercase tracking-widest text-xs flex items-center gap-2">
+                                                <Icon name="comments" size={12} /> Follow-up {idx + 1}
+                                            </span>
+                                            <Icon name={openId === idx ? "chevron-up" : "chevron-down"} size={16} className="text-[#D4AF37]" />
+                                        </button>
+                                        
+                                        {openId === idx && (
+                                            <div className="p-6 text-left border-t border-[#D4AF37]/20 animate-fadeIn flex flex-col md:flex-row gap-6 items-center">
+                                                <div className="flex-[1.5]">
+                                                    <p className="text-white font-serif-classic italic text-xl leading-relaxed">"{t(fq.question, lang)}"</p>
+                                                </div>
+                                                <div className="flex-1 border-l-2 border-[#D4AF37]/20 pl-6 h-full flex flex-col justify-center">
+                                                    <p className="text-[#D4AF37] font-bold uppercase tracking-widest text-[10px] mb-2 flex items-center gap-2"><Icon name="lightbulb" size={12}/> {lang === 'en' ? 'Speaking Starters (B1)' : 'Dicas (B1)'}</p>
+                                                    {t(fq.hint, lang).split('/').map((h, i) => (
+                                                        <p key={i} className="text-zinc-300 font-sans-ui font-light text-sm mt-1">"{h.trim()}"</p>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const ScriptSlide = ({ s, lang }) => (
+            <div className="flex flex-col items-center justify-center h-full w-full max-w-5xl mx-auto p-6 animate-fadeIn z-10">
+                <p className="text-zinc-500 font-sans-ui font-bold tracking-[0.3em] text-[10px] uppercase mb-8">Text Analysis</p>
+                <div className="w-full flex flex-col md:flex-row gap-8 items-stretch mb-8">
+                    <div className="flex-[1.5] bible-card !p-10 flex flex-col justify-center border-l-4 border-l-[#D4AF37]">
+                        <p className="text-xs text-[#D4AF37] font-bold uppercase tracking-widest mb-4">{t(s.speaker, lang)}</p>
+                        <p className="text-3xl md:text-4xl text-white font-serif-classic italic leading-relaxed">"{t(s.quote, lang)}"</p>
+                    </div>
+                    <div className="flex-1 flex flex-col gap-4">
+                        <div className="bg-black/80 p-6 border border-zinc-800 rounded">
+                            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2">{lang === 'en' ? 'Meaning' : 'Significado'}</p>
+                            <p className="text-base text-zinc-300 font-sans-ui leading-relaxed">{t(s.analysis, lang)}</p>
+                        </div>
+                        {s.grammarNote && (
+                            <div className="bg-[#110a0a]/80 p-6 border border-[#722F37]/50 rounded">
+                                <p className="text-[10px] text-[#D4AF37] font-bold uppercase tracking-widest mb-2">Grammar Note</p>
+                                <p className="text-sm text-zinc-300 font-sans-ui italic">{t(s.grammarNote, lang)}</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {s.discussion && (
+                    <div className="bg-[#110a0a]/90 border border-[#D4AF37]/30 p-6 rounded text-left animate-fadeIn shadow-[inset_0_0_20px_rgba(212,175,55,0.05)] w-full flex flex-col md:flex-row gap-6 items-center backdrop-blur-md">
+                        <div className="flex-[1.5]">
+                            <p className="text-[#D4AF37] font-bold uppercase tracking-widest text-[10px] mb-3 flex items-center gap-2"><Icon name="comments" size={12}/> {lang === 'en' ? 'Text Reflection' : 'Reflexão do Texto'}</p>
+                            <p className="text-white font-serif-classic italic text-xl leading-relaxed">"{t(s.discussion.q, lang)}"</p>
+                        </div>
+                        <div className="flex-1 border-l-2 border-[#D4AF37]/20 pl-6 h-full flex flex-col justify-center">
+                            <p className="text-[#D4AF37] font-bold uppercase tracking-widest text-[10px] mb-3 flex items-center gap-2"><Icon name="lightbulb" size={12}/> {lang === 'en' ? 'Speaking Starters (B1)' : 'Para Iniciar a Conversa (B1)'}</p>
+                            {t(s.discussion.h, lang).split('/').map((h, i) => (
+                                <p key={i} className={`text-zinc-300 font-sans-ui font-light text-sm ${i > 0 ? 'mt-2' : ''}`}>"{h.trim()}"</p>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+
+        const GrammarSlide = ({ s, lang }) => (
+            <div className="bible-card text-center animate-fadeIn z-10">
+                <Icon name={s.icon || "book-open"} size={50} className="text-[#D4AF37] mb-6 drop-shadow-md" />
+                <h2 className="text-3xl font-sans-ui font-black mb-4 text-white tracking-[0.2em] uppercase">{t(s.title, lang)}</h2>
+                <p className="text-zinc-400 mb-10 font-serif-classic italic text-xl">{t(s.subtitle, lang)}</p>
+                <div className="space-y-6 text-left border-l-2 border-[#D4AF37] pl-8 ml-2 bg-black/40 p-8 rounded shadow-inner">
+                    {s.examples.map((ex, i) => (
+                        <p key={i} className="text-2xl text-white font-serif-classic italic drop-shadow-md" dangerouslySetInnerHTML={{ __html: t(ex, lang) }}></p>
+                    ))}
+                </div>
+            </div>
+        );
+
+        const SandboxSlide = ({ s, lang }) => {
+            const [mode, setMode] = useState(null);
+            return (
+                <div className="text-center max-w-4xl animate-fadeIn w-full px-4 z-10">
+                    <h2 className="text-2xl font-sans-ui font-black mb-10 text-[#D4AF37] uppercase tracking-[0.2em] drop-shadow-md">{t(s.title, lang)}</h2>
+                    <div className="flex justify-center gap-6 mb-12 flex-wrap">
+                        <button onClick={() => setMode("STANDARD")} className="bg-emerald-900/30 border-2 border-emerald-500 text-emerald-400 font-bold px-10 py-5 rounded hover:bg-emerald-900/60 transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:scale-105 text-lg tracking-wider">STANDARD</button>
+                        <button onClick={() => setMode("INVERSION")} className="bg-blue-900/30 border-2 border-[#D4AF37] text-[#D4AF37] font-bold px-10 py-5 rounded hover:bg-[#D4AF37]/20 transition-all shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:scale-105 text-lg tracking-wider">INVERSION</button>
+                    </div>
+                    <div className="bible-card flex items-center justify-center min-h-[250px]">
+                        {mode === "STANDARD" && <p className="text-4xl font-serif-classic italic text-emerald-400 animate-fadeIn drop-shadow-lg">"The Word <span className="font-bold">was</span> in the beginning."<br/><span className="text-base font-sans-ui text-zinc-400 block mt-6">{lang==='en'?'(Normal statement)':'(Afirmação normal)'}</span></p>}
+                        {mode === "INVERSION" && <p className="text-4xl font-serif-classic italic text-[#D4AF37] animate-fadeIn drop-shadow-lg">"In the beginning <span className="font-bold border-b-2 border-[#D4AF37]">was</span> the Word."<br/><span className="text-base font-sans-ui text-zinc-400 block mt-6">{lang==='en'?'(Poetic / Dramatic Emphasis)':'(Ênfase Poética / Dramática)'}</span></p>}
+                        {!mode && <p className="text-2xl text-zinc-600 font-serif-classic italic">{lang==='en'?'Select a sentence structure...':'Selecione a estrutura...'}</p>}
+                    </div>
+                </div>
+            );
+        };
+
+        const CreatorsForge = ({ s, lang, nextStep }) => {
+            const [built, setBuilt] = useState([]);
+            const [available, setAvailable] = useState([]);
+            const [msg, setMsg] = useState("");
+            const [success, setSuccess] = useState(false);
+
+            useEffect(() => { 
+                setAvailable([...s.words].sort(() => Math.random() - 0.5)); 
+                setBuilt([]);
+                setMsg("");
+                setSuccess(false);
+            }, [s.words]);
+
+            const handleWord = (w) => { setBuilt([...built, w]); setAvailable(available.filter(av => av !== w)); };
+
+            const check = () => {
+                if(built.join(" ") === s.correctPhrase) {
+                    setMsg(lang === 'en' ? "Divine order restored." : "Ordem divina restaurada.");
+                    setSuccess(true);
+                    setTimeout(nextStep, 3000);
+                } else {
+                    setMsg(lang === 'en' ? "Chaos remains. Try again." : "O caos permanece. Tente de novo.");
+                    setAvailable([...s.words].sort(() => Math.random() - 0.5)); setBuilt([]);
+                }
+            };
+
+            return (
+                <div className="bible-card mx-auto max-w-4xl z-10 text-center animate-fadeIn">
+                    <h2 className="font-sans-ui font-black text-2xl text-sacred-gold uppercase tracking-[0.2em] mb-4">The Creator's Forge</h2>
+                    <p className="text-xl text-zinc-300 mb-2 font-serif-classic italic">
+                        {lang === 'en' ? "Build the sentence using the PASSIVE VOICE." : "Construa a frase usando a VOZ PASSIVA."}
+                    </p>
+                    <p className="text-sm text-zinc-500 font-sans-ui mb-10">Active: "{t(s.activeHint, lang)}"</p>
+
+                    <div className="min-h-[100px] border border-dashed border-sacred-gold/40 p-6 flex flex-wrap gap-4 mb-8 bg-black/40 items-center justify-center shadow-inner rounded">
+                        {built.map((w, i) => <div key={i} className="forge-word rounded">{w}</div>)}
+                    </div>
+                    
+                    <div className="flex flex-wrap justify-center gap-4 mb-8">
+                        {available.map((w, i) => <div key={i} onClick={() => handleWord(w)} className="forge-word opacity-70 hover:opacity-100 rounded">{w}</div>)}
+                    </div>
+
+                    {!success && <button onClick={check} className="btn-gold w-full text-sm">{lang === 'en' ? 'Forge the Word' : 'Forjar a Palavra'}</button>}
+                    {success && <Confetti />}
+                    <p className="text-center mt-6 text-xl font-bold h-8 text-sacred-gold tracking-widest uppercase animate-fadeIn">{msg}</p>
+                </div>
+            );
+        };
+
+        const QuizSlide = ({ s, lang, nextAction }) => {
+            const [selected, setSelected] = useState(null);
+            return (
+                <div className="flex flex-col items-center justify-center h-full w-full max-w-4xl mx-auto p-8 animate-fadeIn text-center z-10">
+                    <p className="text-[#D4AF37] font-sans-ui font-bold tracking-[0.3em] text-[10px] uppercase mb-8">{lang === 'en' ? 'Knowledge Check' : 'Verificação'}</p>
+                    <h2 className="text-3xl md:text-4xl font-serif-classic italic text-white mb-10">{t(s.question, lang)}</h2>
+                    <div className="w-full flex flex-col gap-4">
+                        {s.options.map((opt, i) => (
+                            <button key={i} onClick={() => { setSelected(i); if(i === s.answerIndex) setTimeout(nextAction, 2500); }} 
+                                className={`p-6 text-left border rounded transition-all ${selected === i && i === s.answerIndex ? 'bg-emerald-900/30 border-emerald-500' : selected === i && i !== s.answerIndex ? 'bg-red-900/30 border-red-500' : 'bg-black/60 border-zinc-700 hover:border-[#D4AF37]'}`}>
+                                <p className="text-xl text-white font-sans-ui">{t(opt, lang)}</p>
+                            </button>
+                        ))}
+                    </div>
+                    {selected !== null && (
+                        <div className="mt-8">
+                            {selected === s.answerIndex ? 
+                                <p className="text-emerald-400 font-bold text-lg animate-fadeIn">{t(s.explanation, lang)}</p> : 
+                                <p className="text-red-400 font-bold text-lg animate-fadeIn">{lang === 'en' ? "Incorrect. Try again." : "Incorreto. Tente de novo."}</p>
+                            }
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const ShadowingSlide = ({ s, lang }) => (
+            <div className="text-center animate-fadeIn w-full px-4 z-10">
+                <Icon name="ear-listen" size={60} className="text-[#D4AF37] mb-8 drop-shadow-[0_0_15px_rgba(212,175,55,0.5)]" />
+                <h2 className="text-2xl font-sans-ui font-black mb-12 text-[#D4AF37] uppercase tracking-[0.3em]">{t(s.title, lang)}</h2>
+                <p className="text-4xl md:text-6xl font-serif-classic italic text-white mb-8 drop-shadow-xl">"{s.phrase}"</p>
+                <p className="text-xl text-zinc-400 font-sans-ui bg-black/60 inline-block p-4 rounded border border-zinc-800">{t(s.translation, lang)}</p>
+            </div>
+        );
+
+        const DilemmaSlide = ({ s, lang }) => (
+            <div className="flex flex-col items-center justify-center h-full w-full max-w-4xl mx-auto p-8 animate-fadeIn z-10 text-center">
+                <Icon name="scale-balanced" size={50} className="text-[#D4AF37] mb-8 opacity-80" />
+                <h2 className="text-3xl font-sans-ui font-black mb-8 text-[#D4AF37] uppercase tracking-widest">{t(s.title, lang)}</h2>
+                <p className="text-3xl md:text-4xl text-white font-serif-classic italic leading-relaxed mb-12">{t(s.question, lang)}</p>
+                <div className="bg-[#1a0f0f]/80 border border-[#722F37]/50 p-6 w-full max-w-2xl mx-auto text-left rounded">
+                    <p className="text-[#D4AF37] font-bold uppercase tracking-widest text-[10px] mb-2">{lang === 'en' ? 'Speak your truth' : 'Fale a sua verdade'}</p>
+                    <p className="text-lg text-zinc-300 font-sans-ui font-light italic">"{t(s.hint, lang)}"</p>
+                </div>
+            </div>
+        );
+
+        const PrayerRoom = ({ lang }) => {
+            const [recording, setRecording] = useState(false);
+            const [recorded, setRecorded] = useState(false);
+            const [progress, setProgress] = useState(0);
+
+            useEffect(() => {
+                let interval;
+                if (recording) { interval = setInterval(() => { setProgress(p => { if (p >= 100) { setRecording(false); setRecorded(true); return 100; } return p + 2; }); }, 100); }
+                return () => clearInterval(interval);
+            }, [recording]);
+
+            const statusText = recording ? (lang === 'en' ? "Recording..." : "A gravar...") : recorded ? (lang === 'en' ? "Prayer Sent" : "Oração Enviada") : (lang === 'en' ? "Tap to Record" : "Toque para Gravar");
+
+            return (
+                <div className="bible-card text-center animate-fadeIn mx-auto z-10 max-w-3xl">
+                    <p className="text-[#D4AF37] font-sans-ui font-bold tracking-[0.3em] text-[10px] uppercase mb-4">The Prayer Room</p>
+                    <h2 className="text-5xl font-serif-classic italic text-white mb-6">Speak Life</h2>
+                    <p className="text-zinc-400 font-sans-ui text-base mb-10">{lang === 'en' ? "Read the prayer aloud. Practice your pronunciation." : "Leia a oração em voz alta. Pratique a sua pronúncia."}</p>
+
+                    <div className="bg-[#110a0a] border-2 border-[#722F37]/50 p-8 md:p-12 mb-10 rounded shadow-inner">
+                        <p className="text-3xl font-serif-classic italic text-zinc-200 leading-relaxed">
+                            "Lord, I am not an accident.<br/><br/>
+                            I <span className="text-[#D4AF37] font-bold">was made</span> by You.<br/><br/>
+                            Let there be <span className="text-emerald-400 font-bold">light</span> in my life.<br/><br/>
+                            Amen."
+                        </p>
+                    </div>
+
+                    <div className="flex flex-col items-center">
+                        <button onClick={() => { if(!recorded && !recording){ setRecording(true); setProgress(0); } }} disabled={recorded}
+                            className={`w-24 h-24 rounded-full flex items-center justify-center transition-all ${recording ? 'bg-red-900 text-red-500 animate-pulse shadow-[0_0_40px_rgba(220,38,38,0.6)]' : recorded ? 'bg-emerald-900 text-emerald-500 border-2 border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-black border-2 border-[#D4AF37] text-[#D4AF37] hover:bg-[#1a170f] hover:scale-105 shadow-[0_0_15px_rgba(212,175,55,0.3)]'}`}>
+                            <Icon name={recorded ? "check" : "microphone-lines"} size={40} />
+                        </button>
+                        {recording && (<div className="w-56 h-3 bg-zinc-800 mt-6 rounded-full overflow-hidden border border-zinc-700"><div className="h-full bg-gradient-to-r from-red-600 to-red-400 transition-all" style={{width: `${progress}%`}}></div></div>)}
+                        <p className="mt-6 text-sm font-bold uppercase tracking-widest text-[#D4AF37]">{statusText}</p>
+                    </div>
+                </div>
+            );
+        };
+
+        const WritingSlide = ({ s, lang }) => (
+            <div className="flex flex-col items-center justify-center h-full w-full max-w-4xl mx-auto p-8 animate-fadeIn z-10 text-center">
+                <Icon name="feather-pointed" size={50} className="text-[#D4AF37] mb-8 opacity-80" />
+                <h2 className="text-3xl font-sans-ui font-black mb-8 text-white uppercase tracking-widest">{t(s.title, lang)}</h2>
+                <p className="text-2xl text-zinc-300 font-serif-classic italic leading-relaxed mb-8">{t(s.sub, lang) || (lang === 'en' ? "Open the Theological Notes (Top Right) and write your reflection." : "Abra as Notas Teológicas (Canto Superior Direito) e escreva a sua reflexão.")}</p>
+                <div className="bg-black/60 border border-[#D4AF37]/40 p-8 w-full text-left rounded shadow-xl">
+                    <p className="text-[#D4AF37] font-bold uppercase tracking-widest text-xs mb-4">Prompt</p>
+                    <p className="text-xl text-zinc-200 font-sans-ui font-light">{t(s.prompt, lang)}</p>
+                </div>
+            </div>
+        );
+
+        const EndSlide = ({ lang }) => (
+            <div className="flex flex-col items-center justify-center h-full w-full max-w-4xl mx-auto text-center p-8 animate-fadeIn z-10">
+                <Icon name="sun" size={80} className="text-[#D4AF37] mb-8 opacity-90 drop-shadow-[0_0_30px_rgba(212,175,55,0.8)]" />
+                <h1 className="text-5xl md:text-7xl font-serif-classic italic mb-6 text-white tracking-tight drop-shadow-lg">The light shines.</h1>
+                <p className="text-[#D4AF37] font-sans-ui text-sm font-bold tracking-[0.3em] uppercase mb-12">
+                    {lang === 'en' ? "The darkness has not overcome it." : "A escuridão não a venceu."}
+                </p>
+                <button className="btn-gold px-12 py-4 text-sm" onClick={() => window.location.reload()}>{lang === 'en' ? 'Return to Void' : 'Voltar ao Início'}</button>
+            </div>
+        );
+
+        // ==========================================
+        // 📚 25 SLIDES DATA (V5.0 - B1 Level)
+        // ==========================================
+        const SLIDES_DATA = [
+            { type: "intro", title: { en: "The Logos", pt: "O Logos" }, subtitle: { en: "Inversion & Emphasis", pt: "Inversão & Ênfase" }, level: "B2 (Upper-Intermediate)", grammar: "Inversion for Emphasis" }, // 0
+            { type: "guide", title: { en: "Teacher's Guide", pt: "Guia do Professor" }, content: { en: "Welcome to the B2 Version. This lesson elevates the vocabulary (Formlessness, Incarnation) and introduces Grammatical Inversion (e.g., 'In the beginning was the Word') to create dramatic, poetic emphasis.", pt: "Bem-vindo à Versão B2. Esta aula eleva o vocabulário (Formlessness, Incarnation) e introduz Inversão Gramatical (ex: 'In the beginning was the Word') para criar ênfase dramática e poética." } }, // 1
+            { type: "discussion", icon: "book-journal-whills", title: { en: "Origins", pt: "Origens" }, questions: [
+                { question: { en: "If you had to articulate the exact moment the universe began, how would you describe it?", pt: "Se tivesses de articular o exato momento em que o universo começou, como o descreverias?" }, hint: { en: "I would depict it as... / It stands to reason that it was a moment of...", pt: "Eu o descreveria como... / Faz sentido que tenha sido um momento de..." } },
+                { question: { en: "Why is humanity obsessed with discovering our definitive origin?", pt: "Por que a humanidade é obcecada em descobrir a nossa origem definitiva?" }, hint: { en: "It fundamentally gives us a sense of... / Without origins, we cannot ascertain...", pt: "Isso fundamentalmente nos dá uma sensação de... / Sem origens, não podemos determinar..." } },
+                { question: { en: "Can a story truly resonate without a powerful opening?", pt: "Uma história pode realmente ressoar sem uma abertura poderosa?" }, hint: { en: "A powerful opening establishes... / Conversely, a weak start...", pt: "Uma abertura poderosa estabelece... / Por outro lado, um começo fraco..." } }
+            ] }, // 2
+            { type: "relics" }, // 3. The Holy Relics
+            { type: "scrolls" }, // 4. Parallel Scrolls
+            { type: "decoder" }, // 5. Greek Decoder (Logos)
+            { type: "video", videoId: YOUTUBE_ID, start: 222, end: 290, title: { en: "The Reading", pt: "A Leitura" }, mission: { en: "Listen to the reading of John 1.", pt: "Ouça a leitura de João 1." } }, // 6
+            { type: "discussion", icon: "eye", title: { en: "Observation", pt: "Observação" }, questions: [
+                { question: { en: "What specific tone is conveyed through the reading of the Word?", pt: "Que tom específico é transmitido através da leitura da Palavra?" }, hint: { en: "The tone appears remarkably... / It conveys a sense of sheer...", pt: "O tom parece notavelmente... / Transmite um sentimento de puro..." } },
+                { question: { en: "How does the auditory experience enhance the impact of the text?", pt: "Como a experiência auditiva aprimora o impacto do texto?" }, hint: { en: "Auditory elements significantly elevate... / It forces the listener to acknowledge...", pt: "Elementos auditivos elevam significativamente... / Obriga o ouvinte a reconhecer..." } }
+            ] }, // 7
+            { type: "script", speaker: { en: "John", pt: "João" }, quote: { en: "In the beginning was the Word, and the Word was with God...", pt: "No princípio era o Verbo, e o Verbo estava com Deus..." }, analysis: { en: "Notice the inversion: 'In the beginning was the Word' rather than 'The Word was in the beginning'. This stylistic choice amplifies the impact.", pt: "Note a inversão: 'No princípio era o Verbo' em vez de 'O Verbo estava no princípio'. Esta escolha estilística amplifica o impacto." }, grammarNote: { en: "Inversion places the verb before the subject for dramatic emphasis.", pt: "A inversão coloca o verbo antes do sujeito para dar ênfase dramática." }, discussion: { q: { en: "What does this inversion imply about the eternal nature of the Word?", pt: "O que esta inversão implica sobre a natureza eterna da Palavra?" }, h: { en: "It underscores the fact that... / By bringing 'the beginning' to the front, it highlights...", pt: "Ressalta o fato de que... / Ao trazer 'o princípio' para a frente, destaca..." } } }, // 8
+            { type: "script", speaker: { en: "John", pt: "João" }, quote: { en: "The light shines in the darkness, and the darkness has not overcome it.", pt: "A luz brilha nas trevas, e as trevas não a venceram." }, analysis: { en: "Darkness represents formless chaos and ignorance. It is fundamentally incapable of extinguishing the Light.", pt: "A escuridão representa caos sem forma e ignorância. É fundamentalmente incapaz de extinguir a Luz." }, grammarNote: { en: "Present Perfect ('has not overcome') connects the past victory to an ongoing present reality.", pt: "Present Perfect ('has not overcome') conecta a vitória no passado a uma realidade presente contínua." }, discussion: { q: { en: "How do individuals attempt to 'overcome' the truth in modern society?", pt: "Como os indivíduos tentam 'vencer' a verdade na sociedade moderna?" }, h: { en: "Society frequently attempts to obscure truth by... / Nevertheless, truth prevails because...", pt: "A sociedade frequentemente tenta obscurecer a verdade ao... / No entanto, a verdade prevalece porque..." } } }, // 9
+            { type: "quiz", question: { en: "What is the primary function of grammatical inversion in literature?", pt: "Qual é a função primária da inversão gramatical na literatura?" }, options: [{ en: "To confuse the reader", pt: "Para confundir o leitor" }, { en: "To create dramatic emphasis or poetic rhythm", pt: "Para criar ênfase dramática ou ritmo poético" }, { en: "To simplify the sentence structure", pt: "Para simplificar a estrutura da frase" }], answerIndex: 1, explanation: { en: "Exactly! It elevates the register of the text.", pt: "Exatamente! Eleva o registo do texto." } }, // 10
+            { type: "quiz", question: { en: "In philosophical terms, what does 'Logos' encompass?", pt: "Em termos filosóficos, o que engloba o 'Logos'?" }, options: [{ en: "Only spoken words", pt: "Apenas palavras faladas" }, { en: "Divine reason, order, and absolute meaning", pt: "Razão divina, ordem e sentido absoluto" }, { en: "A random sequence of events", pt: "Uma sequência aleatória de eventos" }], answerIndex: 1, explanation: { en: "Correct! It is the underlying logic of the universe.", pt: "Correto! É a lógica subjacente do universo." } }, // 11
+            { type: "grammar", icon: "pen-nib", title: { en: "Standard Order", pt: "Ordem Padrão" }, subtitle: { en: "Subject + Verb + Complement", pt: "Sujeito + Verbo + Complemento" }, examples: [{ en: "<span class='text-zinc-400'>The Word</span> <span class='text-emerald-400'>was</span> <span class='text-[#D4AF37]'>in the beginning.</span>", pt: "<span class='text-zinc-400'>A Palavra</span> <span class='text-emerald-400'>estava</span> <span class='text-[#D4AF37]'>no princípio.</span>" }, { en: "<span class='text-zinc-400'>Life</span> <span class='text-emerald-400'>was</span> <span class='text-[#D4AF37]'>in Him.</span>", pt: "<span class='text-zinc-400'>A vida</span> <span class='text-emerald-400'>estava</span> <span class='text-[#D4AF37]'>nEle.</span>" }] }, // 12
+            { type: "grammar", icon: "bolt", title: { en: "Inversion", pt: "Inversão" }, subtitle: { en: "Complement + Verb + Subject (For Emphasis)", pt: "Complemento + Verbo + Sujeito (Para Ênfase)" }, examples: [{ en: "<span class='text-[#D4AF37]'>In the beginning</span> <span class='text-emerald-400'>was</span> <span class='text-zinc-400 font-bold border-b-2 border-[#D4AF37]'>the Word.</span>", pt: "<span class='text-[#D4AF37]'>No princípio</span> <span class='text-emerald-400'>era</span> <span class='text-zinc-400 font-bold border-b-2 border-[#D4AF37]'>a Palavra.</span>" }, { en: "<span class='text-[#D4AF37]'>In Him</span> <span class='text-emerald-400'>was</span> <span class='text-zinc-400 font-bold border-b-2 border-[#D4AF37]'>life.</span>", pt: "<span class='text-[#D4AF37]'>NEle</span> <span class='text-emerald-400'>estava</span> <span class='text-zinc-400 font-bold border-b-2 border-[#D4AF37]'>a vida.</span>" }] }, // 13
+            { type: "sandbox", title: { en: "Sentence Architecture", pt: "Arquitetura da Frase" } }, // 14
+            { type: "forge", words: ["In", "the", "beginning", "was", "the", "Word"], correctPhrase: "In the beginning was the Word", baseSentence: { en: "Standard: The Word was in the beginning.", pt: "Padrão: O Verbo estava no princípio." } }, // 15
+            { type: "forge", words: ["In", "Him", "was", "life"], correctPhrase: "In Him was life", baseSentence: { en: "Standard: Life was in Him.", pt: "Padrão: A vida estava nEle." } }, // 16
+            { type: "discussion", icon: "moon", title: { en: "Formlessness", pt: "Ausência de Forma" }, questions: [
+                { question: { en: "Is society currently drifting towards a state of 'formlessness' and chaos?", pt: "A sociedade está atualmente a derivar para um estado de 'ausência de forma' e caos?" }, hint: { en: "One might observe that... / Modern structures are deteriorating, leading to...", pt: "Poder-se-ia observar que... / Estruturas modernas estão a deteriorar-se, levando a..." } },
+                { question: { en: "How can individuals establish order amidst profound uncertainty?", pt: "Como os indivíduos podem estabelecer ordem no meio de incerteza profunda?" }, hint: { en: "By adhering to absolute truths, we can... / It is essential to cultivate...", pt: "Ao aderir a verdades absolutas, podemos... / É essencial cultivar..." } },
+                { question: { en: "Does true creativity require a prior state of emptiness or void?", pt: "A verdadeira criatividade requer um estado prévio de vazio ou ausência?" }, hint: { en: "Undeniably, emptiness acts as a canvas for... / I am of the opinion that...", pt: "Inegavelmente, o vazio atua como uma tela para... / Sou da opinião que..." } }
+            ] }, // 17
+            { type: "discussion", icon: "sun", title: { en: "Illumination", pt: "Iluminação" }, questions: [
+                { question: { en: "What constitutes 'true illumination' in an era of misinformation?", pt: "O que constitui a 'verdadeira iluminação' numa era de desinformação?" }, hint: { en: "True illumination transcends mere facts; it provides... / It allows us to discern...", pt: "A verdadeira iluminação transcende meros factos; fornece... / Permite-nos discernir..." } },
+                { question: { en: "Why does exposing the truth often provoke hostility?", pt: "Por que expor a verdade frequentemente provoca hostilidade?" }, hint: { en: "People are generally comfortable in their ignorance because... / Confronting reality can be incredibly...", pt: "As pessoas geralmente estão confortáveis na sua ignorância porque... / Confrontar a realidade pode ser incrivelmente..." } },
+                { question: { en: "How does the concept of 'Logos' reconcile science and faith?", pt: "Como o conceito de 'Logos' reconcilia ciência e fé?" }, hint: { en: "Both fields seek to understand the inherent order of... / The Logos represents the ultimate logic behind...", pt: "Ambos os campos procuram entender a ordem inerente de... / O Logos representa a lógica suprema por trás de..." } }
+            ] }, // 18
+            { type: "dilemma", title: { en: "Relativism vs. Absolute Truth", pt: "Relativismo vs. Verdade Absoluta" }, question: { en: "Is truth subjective to individual experience, or is there an absolute Logos?", pt: "A verdade é subjetiva à experiência individual, ou existe um Logos absoluto?" }, hint: { en: "If truth were entirely subjective, society would... / The existence of natural laws suggests...", pt: "Se a verdade fosse inteiramente subjetiva, a sociedade iria... / A existência de leis naturais sugere..." } }, // 19
+            { type: "shadowing", title: { en: "Listen & Repeat", pt: "Ouça e Repita" }, phrase: "And the light shines in the darkness, and the darkness has not overcome it.", translation: { en: "(The absolute truth persists despite all chaos.)", pt: "(A verdade absoluta persiste apesar de todo o caos.)" } }, // 20
+            { type: "prayer" }, // 21
+            { type: "discussion", icon: "bolt", title: { en: "The Incarnation", pt: "A Encarnação" }, questions: [
+                { question: { en: "What is the philosophical significance of the Creator entering His own creation?", pt: "Qual é o significado filosófico do Criador entrar na sua própria criação?" }, hint: { en: "It bridges the gap between the infinite and the... / It demonstrates a profound level of...", pt: "Preenche a lacuna entre o infinito e o... / Demonstra um profundo nível de..." } },
+                { question: { en: "How does the Incarnation challenge our perception of power?", pt: "Como a Encarnação desafia a nossa perceção de poder?" }, hint: { en: "True power is often associated with dominance, whereas this shows... / Vulnerability becomes a form of...", pt: "O verdadeiro poder é frequentemente associado à dominância, enquanto isto mostra... / A vulnerabilidade torna-se uma forma de..." } },
+                { question: { en: "In what ways does 'The Word made flesh' elevate human dignity?", pt: "De que maneiras 'O Verbo feito carne' eleva a dignidade humana?" }, hint: { en: "By taking on human form, it validates... / It implies that humanity possesses...", pt: "Ao assumir a forma humana, valida... / Implica que a humanidade possui..." } }
+            ] }, // 22
+            { type: "writing", title: { en: "The Scribe's Journal", pt: "O Diário do Escriba" }, prompt: { en: "Draft a short essay reflecting on how the concept of 'Logos' provides meaning in a chaotic modern world. Use at least two examples of grammatical inversion.", pt: "Redija um pequeno ensaio refletindo sobre como o conceito de 'Logos' fornece sentido num mundo moderno caótico. Use pelo menos dois exemplos de inversão gramatical." } }, // 23
+            { type: "end" } // 24
+        ];
+
+        // --- MAIN APP ---
+        function App() {
+            const [slideIdx, setSlideIdx] = useState(0);
+            const [voidCleared, setVoidCleared] = useState(false);
+            const [lang, setLang] = useState('en');
+
+            const toggleLang = () => setLang(l => l === 'en' ? 'pt' : 'en');
+            const next = () => { if (slideIdx < SLIDES_DATA.length - 1) setSlideIdx(s => s + 1); };
+            const prev = () => { if (slideIdx > 0) setSlideIdx(s => s - 1); };
+
+            // The Void Pre-loader
+            if (!voidCleared) {
+                return <TheVoidSlide onComplete={() => setVoidCleared(true)} />;
+            }
+
+            const current = SLIDES_DATA[slideIdx];
+
+            const renderSlide = () => {
+                switch (current.type) {
+                    case "intro": return <CoverSlide s={current} lang={lang} next={next} />;
+                    case "guide": return <GuideSlide s={current} lang={lang} />;
+                    case "discussion": return <DiscussionSlide key={slideIdx} s={current} lang={lang} />;
+                    case "video": return <VideoSlide s={current} lang={lang} />;
+                    case "scrolls": return <ParallelScrolls lang={lang} />;
+                    case "decoder": return <GreekDecoder lang={lang} />;
+                    case "relics": return <HolyRelics lang={lang} />;
+                    case "script": return <ScriptSlide s={current} lang={lang} />;
+                    case "grammar": return <GrammarSlide s={current} lang={lang} />;
+                    case "forge": return <CreatorsForge key={slideIdx} s={current} lang={lang} nextStep={next} />;
+                    case "sandbox": return <SandboxSlide s={current} lang={lang} />;
+                    case "quiz": return <QuizSlide key={slideIdx} s={current} lang={lang} nextAction={next} />;
+                    case "dilemma": return <DilemmaSlide key={slideIdx} s={current} lang={lang} />;
+                    case "shadowing": return <ShadowingSlide s={current} lang={lang} />;
+                    case "prayer": return <PrayerRoom lang={lang} />;
+                    case "writing": return <WritingSlide s={current} lang={lang} />;
+                    case "end": return <EndSlide lang={lang} />;
+                    default: return <div className="text-white text-2xl z-10">Slide not found.</div>;
+                }
+            };
+
+            return (
+                <div className="w-full h-screen relative flex flex-col font-sans-ui selection:bg-[#D4AF37]/40 selection:text-white bg-[#050505]">
+                    {/* CONDITIONAL BACKGROUND: Image on Cover, Bible aesthetics on the rest */}
+                    {current.type === 'intro' ? (
+                        <>
+                            <div className="cover-image-bg"></div>
+                            <div className="cover-gradient"></div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="leather-overlay"></div>
+                            <div className="cross-watermark"><Icon name="cross" /></div>
+                            <div className="divine-glow"></div>
+                            <div className="gilded-edges gilded-edge-left"></div>
+                            <div className="gilded-edges gilded-edge-right"></div>
+                            <div className="corner-ornament corner-tl"></div>
+                            <div className="corner-ornament corner-tr"></div>
+                            <div className="corner-ornament corner-bl"></div>
+                            <div className="corner-ornament corner-br"></div>
+                            <div className="gold-foil-frame"></div>
+                            <div className="bookmark-ribbon"></div>
+                        </>
+                    )}
+                    
+                    <TeacherTools lang={lang} toggleLang={toggleLang} />
+
+                    <div className="flex-1 relative z-10 w-full h-full overflow-y-auto safe-scroll-container">
+                        <div className="safe-scroll-content">
+                            {renderSlide()}
+                        </div>
+                    </div>
+
+                    {/* Navigation Footer */}
+                    {slideIdx > 0 && current.type !== 'end' && (
+                        <div className="z-50 w-full p-6 absolute bottom-0 flex flex-col items-center bg-gradient-to-t from-black via-black/80 to-transparent">
+                            <div className="max-w-5xl w-full flex justify-between items-center relative">
+                                <button onClick={prev} disabled={slideIdx === 0} className="text-zinc-500 hover:text-[#D4AF37] font-bold text-xs uppercase tracking-widest disabled:opacity-30 transition-colors flex items-center gap-2 drop-shadow-md">
+                                    <Icon name="chevron-left" size={14} /> {lang === 'en' ? 'Back' : 'Anterior'}
+                                </button>
+                                
+                                <div className="absolute left-1/2 transform -translate-x-1/2 text-[#D4AF37] font-bold tracking-[0.3em] text-[10px] uppercase hidden sm:block opacity-70">
+                                    {lang === 'en' ? 'PAGE' : 'PÁGINA'} {slideIdx + 1} {lang === 'en' ? 'OF' : 'DE'} {SLIDES_DATA.length}
+                                </div>
+
+                                <button onClick={next} disabled={slideIdx === SLIDES_DATA.length - 1} className="text-[#D4AF37] hover:text-white font-bold text-xs uppercase tracking-widest disabled:opacity-30 transition-colors flex items-center gap-2 drop-shadow-md">
+                                    {lang === 'en' ? 'Next' : 'Próximo'} <Icon name="chevron-right" size={14} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        
+        const rootElement = document.getElementById('root');
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(<App />);
+    </script>
+</body>
+</html>
